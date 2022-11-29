@@ -1,0 +1,89 @@
+{% load static%}
+<html>
+<head>
+    <title>SWIGGY </title>
+    <h1>
+      <h1 style="background-color:rgb(255, 30, 206);">       AMMAN HOTEL       </h1>
+      <h1 style="background-color:rgb(71, 255, 141);">This cozy restaurant has left the best impressions!
+         Hospitable hosts,
+          delicious dishes,
+           beautiful presentation, 
+           wide wine list and wonderful dessert.
+            I recommend to everyone! I would like to come back here again and again.</h1> 
+       <!-- <h2>TODAY OFFERS</h2>
+
+       
+       <p>40% off up to ₹80 | Use code TRYNEW,
+
+
+        25% off up to ₹100 | Use AUDC100 Above ₹299
+       </p>
+            
+       <iframe width="1700" height="400" src=" https://www.youtube.com/embed/7O0FcxNjB6Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+         -->
+           
+        <!-- <h1 style="color:rgb(255, 0, 0);">AMMAN HOTEL</h1> -->
+    </h1>
+   
+   
+</head>
+
+<body>
+  
+  
+  
+  <form action = "" method = "post">
+ 
+    {{form.as_p}}
+    
+  </form>
+    <div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="{%static 'images/FIRST.jpg '%}" class="d-block w-50" alt="{%static 'images/FIRST.jpg '%}">
+          </div>
+          <!-- <h1 style="background-color:powderblue;">TODAY OFFERS</h1> -->
+          <h1 style="background-color:powderblue;font-family:verdana;">TODAY OFFER</h1>
+
+
+       
+       <p>40% off up to ₹80 | Use code TRYNEW,
+
+
+        25% off up to ₹100 | Use AUDC100 Above ₹299
+       </p>
+            
+       <iframe width="1700" height="400" src=" https://www.youtube.com/embed/7O0FcxNjB6Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+       <!--   -->
+
+       
+        
+          </div>
+        
+        </div>
+      </div>
+
+
+
+      <div class="container">
+        {% for i in foods %}
+        <img src="{{i.image.url}}" class='img-responsive' width="350" height="200"/></a>
+        <p class="lead">{{i.food}}</p>
+        <p class="lead">{{i.quentity}}</p>
+        <p class="lead">{{i.price}}</p>
+
+
+        {% endfor %}
+      </div>
+      <!-- <button type="submit" class="btn btn-primary">Logout</button> -->
+      <a href="{% url 'Logout' %}"></a>
+
+
+      <input type="button" style="background-color:black;color:white;width:150px;
+       height:40px;" value="LOGOUT!!"<a href="{% url 'Logout' %}"></a>>
+     
+    <!-- <img src="{%static 'images/1.jpg '%}" class="rounded float-start" alt="{%static 'images/1.jpg '%}">
+    <img src="{%static 'images/3.jpg '%}" class="rounded float-end" alt="{%static 'images/3.jpg '%}"> -->
+     
+</body>
+</html>
