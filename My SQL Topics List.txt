@@ -1,0 +1,111 @@
+ALTER Command
+
+	ALTER command is Data Definition Language (DDL).
+      Alter command will perform the action on structure level and not on the data level.
+      ALTER Command by default initializes values of all the tuple as NULL.
+      This command make changes with table structure.
+
+
+UPDATE Command
+
+     UPDATE Command is a Data Manipulation Language (DML).
+     Update command will perform on the data level.
+     UPDATE Command is used to update existing records in a database.
+     This command makes changes with data inside the table.
+
+DELETE Command
+
+     The DELETE command is Data Manipulation Language Command.
+     The DELETE command deletes one or more existing records from the table in the database.
+     We can restore any deleted row or multiple rows from the database using the ROLLBACK command.
+     
+DROP Command
+
+     The DROP command is Data Definition Language Command.
+     The DROP Command drops the complete table from the database.
+     We cannot get the complete table deleted from the database using the ROLLBACK command
+
+
+NULL 
+
+    NULL means you do not have to provide a value for the field
+
+NOT NULL
+
+    NOT NULL means you must provide a value for the fields.
+
+
+My SQL Statement
+
+
+    SELECT Statement
+    INSERT INTO Statement
+    UPDATE Statement
+    DELETE Statement
+    GROUP BY Statement
+    INSERT INTO SELECT Statement
+    CASE Statement
+    CREATE DATABASE Statement
+    DROP DATABASE Statement
+    CREATE TABLE Statement
+    DROP TABLE Statement
+    ALTER TABLE Statement
+    CREATE INDEX Statement
+    CREATE VIEW Statement
+
+My SQL Clause
+
+    WHERE Clause
+    LIMIT Clause
+    HAVING Clause
+
+My SQL Operators
+
+    AND, OR and NOT Operators
+    LIKE Operator
+    IN Operator
+    BETWEEN Operator
+    UNION Operator
+    EXISTS Operator
+    ANY and ALL Operators
+    Arithmetic Operators
+    Bitwise Operators
+    Comparison Operators
+    Compound Operators
+    Logical Operators
+
+My SQL Functions
+
+    MIN() and MAX() Functions
+    COUNT(), AVG() and SUM() Functions
+    NULL Functions
+    String Functions
+    Numeric Functions
+    Date Functions
+    Advanced Functions
+
+MySQL Comments
+
+    Single Line Comments
+    Multi-line Comments
+
+MySQL Constraints
+
+    NOT NULL Constraint
+    UNIQUE Constraint
+    PRIMARY KEY Constraint
+    FOREIGN KEY Constraint
+    CHECK Constraint
+    DEFAULT Constraint
+
+My SQL Keyword
+
+    ORDER BY Keyword
+    AUTO_INCREMENT Keyword
+    
+
+
+
+    
+     
+      
