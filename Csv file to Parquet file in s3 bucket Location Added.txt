@@ -1,0 +1,6 @@
+CREATE TABLE my_parquet_table
+    WITH (
+          format = 'PARQUET',
+          parquet_compression = 'SNAPPY',
+          external_location = 's3://vaishnu-files/vaishnu/'
+    ) AS SELECT * FROM student
