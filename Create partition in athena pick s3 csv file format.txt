@@ -1,0 +1,17 @@
+CREATE EXTERNAL TABLE student_csv (
+  id BIGINT,
+  name STRING,
+  address STRING,
+  department STRING,
+  it BIGINT,
+  os BIGINT,
+  electronics BIGINT,
+  datastructure BIGINT,
+  python BIGINT
+)
+PARTITIONED BY (dt string)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION 's3://vaishnu-files/student/'
+TBLPROPERTIES ("skip.header.line.count"="1", "serialization.null.format"="")
