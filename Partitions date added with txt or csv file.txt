@@ -1,0 +1,19 @@
+
+CREATE EXTERNAL TABLE partitons_reports1 (
+  id bigint,
+  name string,
+  address string,
+  department string,
+  it bigint,
+  os bigint,
+  electronics bigint,
+  datastructure bigint,
+  python bigint
+)
+PARTITIONED BY (date string)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LOCATION 's3://vaishnu-files/vaishnu/2023-04-01/'
+TBLPROPERTIES ("skip.header.line.count"="1", "serialization.null.format"="")
+
+ALTER TABLE partitons_reports1 ADD PARTITION (date='2023-04-01') LOCATION  's3://vaishnu-files/vaishnu/2023-04-01/';
