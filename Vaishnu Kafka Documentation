@@ -1,0 +1,104 @@
+STEP 1
+
+kafka install -- 108 mb  ---- https://kafka.apache.org/downloads
+
+
+STEP 2
+
+tar -xvf kafka_2.13-3.6.1.tgz
+
+The tar command is used in Unix-like operating systems to manipulate archives, commonly used for packaging files and directories. 
+
+    -x: Extract files from an archive.
+    -v: Verbose mode, which displays the progress of the extraction.
+    -f: Specifies the archive file to be processed. In this case, it's kafka_2.13-3.6.1.tgz.
+
+STEP 3
+
+java -version
+
+sudo apt-get update
+sudo apt-get install openjdk-8-jdk
+
+export JAVA_HOME=/path/to/your/java
+export PATH=$PATH:$JAVA_HOME/bin  -------- Replace /path/to/your/java with the actual path to your Java installation directory.
+
+java -version
+
+
+STEP 4
+
+cd kafka_2.13-3.6.1   ----- his command changes your current working directory to the newly extracted Kafka directory.
+
+STEP 5
+
+bin/kafka-topics.sh
+
+SYNTAX EXAMPLE : bin/kafka-topics.sh --create --topic my_topic --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
+
+
+
+
+The kafka-topics.sh script is part of Apache Kafka, and it is used for managing topics in a Kafka cluster. Topics in Kafka are the primary mechanism for categorizing and organizing the messages or records that are produced and consumed.
+
+STEP 6
+
+pwd   ----check the current path 
+
+STEP 7
+
+sudo vim /etc/environment  ----- ADD PATH IN CURRENT DIRECTORY 
+
+Example :/home/vaishnu/Downloads/kafka_2.13-3.6.1
+
+STEP 8
+
+source /etc/environment
+
+The command source /etc/environment is used in Unix-like operating systems to execute the commands from the specified file (/etc/environment in this case) in the current shell session. It reads and sets environment variables defined in that file, making them available for the current session.
+
+Note:
+
+    It's important to note that changes made using source only affect the current shell session. If you want the changes to be permanent and apply to all users, you would typically need to log out and log back in or restart the system.
+
+STEP 9
+
+Check the Path without Kafka directory working this fine for this command {kafka-topics.sh}
+
+STEP 10
+
+zookeeper-server-start.sh config/zookeeper.properties
+
+Check the Port 2181, Its Properly Running on Zookeeper!!!!!!
+
+STEP 11
+
+kafka-server-start.sh config/server.properties
+
+Check the Last Page Kafka is Started !!!!!!!!
+
+STEP 12
+
+Change Configs Commands ------ vim config/server.properties 
+
+select log dir ---- change the configs.....
+
+STEP 13 
+
+CREATE TOPIC : bin/kafka-topics.sh --create --topic Athiva --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
+
+
+TOPIC LIST : bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+
+DELETE TOPIC : bin/kafka-topics.sh --delete --topic Athiva_tech --bootstrap-server localhost:9092
+
+Producer messages : bin/kafka-console-producer.sh --topic Athiva --bootstrap-server localhost:9092
+
+
+Consumer messages: bin/kafka-console-consumer.sh --topic Athiva --bootstrap-server localhost:9092 --from-beginning
+
+Last Checking JPS Command...........
+
+
+
