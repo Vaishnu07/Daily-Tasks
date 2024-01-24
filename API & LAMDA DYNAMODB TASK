@@ -1,0 +1,102 @@
+
+USING PYTHON CREATE API GATEWAY INTEGRATE WITH LAMBDA AND FETCH THE DATA FROM DYNAMO DB TABLE SINGLE RECORDS
+
+
+
+METHOD 1 
+
+
+import boto3
+import json
+from decimal import Decimal
+from boto3.dynamodb.types import DYNAMODB_CONTEXT
+
+# Create a DynamoDB resource
+dynamodb = boto3.resource('dynamodb')
+
+# Specify the table name
+table_name = 'employee_vaishnu'
+
+# Custom JSON encoder to handle Decimal types
+class CustomJsonEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(CustomJsonEncoder, self).default(obj)
+
+# Get a reference to the DynamoDB table
+table = dynamodb.Table(table_name)
+
+def lambda_handler(event, context):
+    print(event)
+
+    # Specify the employee ID you want to retrieve
+    item_id = 1
+    
+    try:
+        # Perform the get_item operation
+        response = table.get_item(
+            Key={
+                'empid': item_id,
+            }
+        )
+        print(response)
+        
+        # Serialize the DynamoDB item using the custom JSON encoder
+        items = json.dumps(response.get('Item'), cls=CustomJsonEncoder)
+    
+        # Print or do something with the serialized item
+        print(items)
+        
+        # Return a response with status code and serialized item
+        return {
+            "statusCode": 200,
+            "body": items
+        }
+    
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
+METHOD 2 
+
+import boto3
+import simplejson as json
+# Create a DynamoDB resource
+dynamodb = boto3.resource('dynamodb')
+
+# Specify the table name
+table_name = 'employee_vaishnu'
+# Get a reference to the DynamoDB table
+table = dynamodb.Table(table_name)
+def lambda_handler(event, context):
+    print(event)
+
+    # Specify the employee ID you want to retrieve
+    item_id = 2
+    
+    try:
+        # Perform the get_item operation
+        response = table.get_item(
+            Key={
+                'empid': item_id,
+            }
+        )
+        print(response)
+        
+        items = json.dumps(response.get('Item'), use_decimal=True)
+
+        print(items)
+        return {
+            "statuscode": 200,
+            "body": items
+        }
+    
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
+
