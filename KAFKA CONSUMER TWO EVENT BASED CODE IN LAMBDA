@@ -1,0 +1,109 @@
+
+IN KAFKA CONSUMER TWO EVENT BASED CODE IN LAMBDA MUST TRY FOR TWO EVENTS. 
+
+{NOTE ; LAMBDA TO S3 LOAD AND CREATE GLUE CRAWLERS AND ATHENA QUERY}
+
+import json
+from confluent_kafka import Consumer, KafkaException
+import boto3
+
+def lambda_handler(event, context):
+    # Define the S3 bucket name
+    s3_bucket_name = 'vaishnu-files'
+
+    # Upstash Kafka configuration
+    upstash_bootstrap_servers = 'unified-cockatoo-8233-eu1-kafka.upstash.io:9092'
+    upstash_username = 'dW5pZmllZC1jb2NrYXRvby04MjMzJD7PSBslPbwmPD-_Sxv2EUZZhI5dF6VkhoI'
+    upstash_password = 'YzU3YjcwZTYtY2U2OS00YTQ5LWI5YjEtODRiNjY1MGM2MGY0'
+
+    # Kafka Consumer configuration
+    consumer_config = {
+        'bootstrap.servers': upstash_bootstrap_servers,
+        'group.id': 'my-group',
+        'sasl.mechanisms': 'SCRAM-SHA-256',
+        'security.protocol': 'SASL_SSL',
+        'sasl.username': upstash_username,
+        'sasl.password': upstash_password,
+        'auto.offset.reset': 'earliest'
+    }
+
+    # Create a Kafka Consumer
+    consumer = Consumer(consumer_config)
+
+    # Subscribe to the Kafka topic
+    consume = consumer.subscribe(['Athiva'])
+    print(consume)
+
+    # Create an S3 client
+    s3_client = boto3.client('s3')
+
+    # Consume messages from Kafka
+    for _ in range(5):
+      
+        msg = consumer.poll(timeout=3.0)
+        print(msg)
+        if msg is None:
+            continue
+        if msg.error():
+            print("Consumer error: {}".format(msg.error()))
+            continue
+
+        # Decode the message
+        message = msg.value().decode('utf-8')
+        print("Received message:", message)
+
+        # Parse the JSON message
+        try:
+            payload = json.loads(message)
+            print(payload)
+            print(type(payload))
+
+            event_type = payload[0]['event_type']
+            if event_type == payload[0]['event_type']:
+                user_id = payload[1]['user_id']
+                print(user_id)
+            elif event_type == payload[0]['event_type']:
+                order_id = payload[1]['order_id']
+                print(order_id)
+
+                
+            
+            # str_payload = json.dumps(payload).encode('utf-8')
+
+            if event_type is None:
+                print("Event type is missing in the payload. Skipping...")
+                continue
+            print(event_type)
+            # Define the S3 prefix based on the event type
+            if event_type == 'order_placed':
+                s3_path = 'Kafka consume/order_placed/'+ payload[1]["order_id"] + '.csv'
+            elif event_type == 'user_registration':
+                s3_path = 'Kafka consume/user_registration/'+ payload[1]["user_id"] + '.csv'
+            else:
+                print("Invalid event type. Skipping...")
+                continue
+
+            # Define the S3 path based on the event type and order ID
+            # s3_path = s3_prefix + payload[1]['order_id'] + '.json'
+
+            # Write the message to S3
+            try:
+                lis_dic = {}
+                for i in payload:
+                    print(i)
+                    lis_dic.update(i)
+                        
+                    
+                print(lis_dic)
+                s3_client.put_object(Key=s3_path, Bucket=s3_bucket_name, Body=json.dumps(lis_dic).encode('utf-8'))
+                
+                print("Message written to S3:", s3_path)
+            
+            except Exception as e:
+                print("Error writing message to S3:", e)
+        except json.JSONDecodeError as e:
+            print("Error decoding message:", e)
+            continue
+
+    # Close the Kafka consumer
+    consumer.close()
