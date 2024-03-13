@@ -1,0 +1,14 @@
+Using Apache Spark Docker containers to run pyspark programs using spark-submit
+========================================================================================
+mkdir spark_docker
+cd spark_docker/
+cat > docker-compose.yaml
+sudo apt install docker-compose
+mv docker-compose.yml docker-compose.yaml
+vim docker-compose.yaml 
+sudo docker-compose up -d
+docker cp -L sample.py spark_spark-master_1:/opt/bitnami/spark/sample.py
+sudo docker cp -L sample.py db339fbd3892:/opt/bitnami/spark/sample.py
+sudo docker logs db339fbd3892
+sudo docker-compose exec db339fbd3892 spark-submit --master spark://172.18.0.2:7077 sample.py
+========================================================================================
