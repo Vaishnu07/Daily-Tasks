@@ -1,0 +1,25 @@
+WOrking APache Spark in Terminal 
+
+step 1: 
+
+java --version
+sudo apt install default-jdk
+
+Step 2:
+
+Apache Spark install go to location: https://www.apache.org/dyn/closer.lua/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
+
+seperate folder spark / and extract that using tar or right click
+
+Go to the that folder ex: home/spark/----- ls-----ls -lrt
+
+commands : tar -xvzf spark-3.5.1-bin-hadoop3.tgz/// ls -lrt
+
+step 3:
+
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+JAVA_HOMEPATH="/usr/lib/jvm/java-11-openjdk-amd64"
+
+
+SPARK_HOME=/Desktop/Spark_demo/spark-3.5.1-bin-hadoop3
+PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
