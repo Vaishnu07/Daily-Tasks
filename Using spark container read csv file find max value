@@ -1,0 +1,43 @@
+import boto3
+import csv
+from pyspark.sql import SparkSession
+from io import StringIO
+session = boto3.session.Session(aws_access_key_id='AKIAUMRXWZO3K6A66KZI',
+                                aws_secret_access_key='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',
+                                region_name='ap-south-1')
+print(session)
+s3 = session.client('s3')
+# Create a SparkSession
+spark = SparkSession.builder \
+   .appName("Max Marks Finder") \
+   .getOrCreate()
+response = s3.get_object(Bucket="vaishnu-files", Key="student/dt=2023-03-28/students-data.csv")
+content = response['Body'].read().decode('utf-8')
+csv_reader = csv.reader(StringIO(content))
+print(csv_reader)
+# for row in csv_reader:
+#     print(row)
+# Skip header row
+next(csv_reader)  # Skip the first row (header)
+max_marks_subject = {}
+
+for row in csv_reader:
+    for subject, column_index in {'IT': 2, 'OS': 3, 'electronics': 4, 'Datastructure': 5, 'Python': 6}.items():
+        try:
+            marks = float(row[column_index])  # Extract marks for the subject
+            max_marks_subject[subject] = max(max_marks_subject.get(subject, float('-inf')), marks)
+        except (ValueError, IndexError):
+            pass  # Skip non-numeric values or missing columns
+
+# Print maximum marks for each subject
+for subject, max_marks in max_marks_subject.items():
+    print(f"Maximum marks for {subject}: {max_marks}")
+
+    
+# Stop the SparkSession
+spark.stop()
+
+
+
+
+
