@@ -10,5 +10,5 @@ sudo docker-compose up -d
 docker cp -L sample.py spark_spark-master_1:/opt/bitnami/spark/sample.py
 sudo docker cp -L sample.py db339fbd3892:/opt/bitnami/spark/sample.py
 sudo docker logs db339fbd3892
-sudo docker-compose exec db339fbd3892 spark-submit --master spark://172.18.0.2:7077 sample.py
+sudo docker exec db339fbd3892 spark-submit --master spark://172.18.0.2:7077 sample.py
 ========================================================================================
