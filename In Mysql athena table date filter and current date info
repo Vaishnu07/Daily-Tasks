@@ -1,0 +1,31 @@
+SELECT * 
+FROM "default"."dev_calls_history_all_info" 
+WHERE CAST("session_start_time" AS DATE) = CURRENT_DATE;
+
+
+
+SELECT * 
+FROM "default"."dev_calls_history_all_info" 
+WHERE DATE_TRUNC('day', CAST("session_start_time" AS TIMESTAMP)) = DATE '2024-04-24';
+
+
+
+SELECT *
+      FROM "liberty-combine-full-and-incremental-export"."sessions_full_export_combine_incremental_export"
+      WHERE DATE(DATE_PARSE("session_start_time", '%Y-%m-%d %H:%i:%s')) = current_date;
+
+SELECT count(*)
+      FROM "liberty-combine-full-and-incremental-export"."sessions_full_export_combine_incremental_export"
+      WHERE DATE(DATE_PARSE("session_start_time", '%Y-%m-%d %H:%i:%s')) = current_date;
+
+
+
+SELECT "pk", COUNT(*) AS value_count
+FROM "liberty-combine-full-and-incremental-export"."sessions_full_export_combine_incremental_export"
+WHERE DATE(DATE_PARSE("session_start_time", '%Y-%m-%d %H:%i:%s')) = DATE '2023-11-27'
+GROUP BY "pk";
+
+
+SELECT *
+      FROM "liberty-combine-full-and-incremental-export"."sessions_full_export_combine_incremental_export"
+      WHERE DATE(DATE_PARSE("session_start_time", '%Y-%m-%d %H:%i:%s')) = DATE '2023-11-24';
