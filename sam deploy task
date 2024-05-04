@@ -1,0 +1,38 @@
+Sam template create cloud formation 
+----------------------------------------------------
+                                                                             correct way for create [calls ----function 1.app.py 2. requirements.txt ----template.yml]
+1. create empty folder local ex : calls
+2. create function folder idu kulla two file added 
+          i) app.py
+          ii) requirements.txt (requests)
+app.py inside 
+
+import json
+import requests
+
+
+def lambda_handler(event, context):
+    print(event)
+    headers = {"Content-Type": "application/json; charset=utf-8", "Authorization": "Token token=513f1278bb3f98dfee7a9817f860a09d"} 
+    response = requests.get(url= "https://api.callrail.com/v3/a/704644062/calls.json", headers=headers)
+    print(response.json())
+
+
+3. template.yml file create 
+  AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Resources:
+
+  leroicallsapi:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+
+4. ls  ---------- to visible function folder ------ template.yml file 
+
+5. sudo sam build --use-container  ----- put in password
+
+6. sam deploy --guided --profile external-profile
