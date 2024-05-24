@@ -1,0 +1,107 @@
+import boto3
+from botocore.exceptions import ClientError  # Import ClientError for S3 error handling
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
+import io
+import os
+import json
+# Function to download objects from S3 bucket
+def download_from_s3(bucket_name, s3_prefix):
+    s3 = boto3.client('s3')
+    paginator = s3.get_paginator('list_objects_v2')
+    for result in paginator.paginate(Bucket=bucket_name, Prefix=s3_prefix):
+        if 'Contents' in result:
+            for obj in result['Contents']:
+                key = obj['Key']
+                print(f"Downloading {key} from S3 bucket {bucket_name}...")
+                file_stream = io.BytesIO()
+                try:
+                    s3.download_fileobj(bucket_name, key, file_stream)
+                    file_stream.seek(0)
+                    yield key, file_stream
+                except ClientError as e:
+                    print(f"Failed to download {key} from S3: {e}")
+        else:
+            print("No contents found in S3 bucket.")
+# Function to authenticate with Google Drive
+def authenticate_gdrive(credentials_data):
+    SCOPES = ['https://www.googleapis.com/auth/drive']
+    try:
+        creds = service_account.Credentials.from_service_account_info(credentials_data, scopes=SCOPES)
+        service = build('drive', 'v3', credentials=creds)
+        return service
+    except Exception as e:
+        print(f"Failed to authenticate with Google Drive: {e}")
+        return None
+# Function to upload files to Google Drive folder
+def upload_to_gdrive(service, file_stream, file_name, folder_id, mimetype):
+    try:
+        file_metadata = {'name': file_name, 'parents': [folder_id]}
+        media = MediaIoBaseUpload(file_stream, mimetype=mimetype, resumable=True)
+        file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        file_id = file.get('id')
+        print(f"Uploaded {file_name} to Google Drive with file ID: {file_id}")
+        return file_id
+    except Exception as e:
+        print(f"Failed to upload {file_name} to Google Drive: {e}")
+        return None
+# Function to check if the file exists in Google Drive folder
+def check_file_in_gdrive(service, file_id):
+    try:
+        file = service.files().get(fileId=file_id, fields='id, name').execute()
+        print(f"File found in Google Drive: {file['name']} (ID: {file['id']})")
+        return True
+    except Exception as e:
+        print(f"Error checking file in Google Drive: {e}")
+        return False
+def lambda_handler(event, context):
+    # Environment variables
+    bucket_name = 'vaishnu-files'
+    s3_prefix = 'sample007'
+    folder_id = '17LerCbF3EduklNAz4vufajWTaeBkIR93'
+    # Load credentials from S3
+    s3 = boto3.client('s3')
+    try:
+        cred_data = s3.get_object(Bucket='vaishnu-files', Key='sample007/credentials.json')
+        credentials_data = json.loads(cred_data['Body'].read().decode("utf-8"))
+        print(credentials_data)
+    except Exception as e:
+        print(f"Failed to load credentials data from S3: {e}")
+    # Authenticate with Google Drive
+    print("Authenticating with Google Drive...")
+    service = authenticate_gdrive(credentials_data)
+    print(service)
+    if service is None:
+        return {
+            'statusCode': 500,
+            'body': 'Failed to authenticate with Google Drive.'
+        }
+    print("Authentication successful.")
+    # Download objects from S3 and upload directly to Google Drive
+    print("Starting the download and upload process...")
+    files_uploaded = False
+    for key, file_stream in download_from_s3(bucket_name, s3_prefix):
+        file_name = key.split('/')[-1]
+        print(f"Uploading {file_name} to Google Drive...")
+        # Determine the MIME type based on file extension
+        if file_name.endswith('.csv'):
+            mimetype = 'text/csv'
+        else:
+            mimetype = 'application/octet-stream'  # Default to binary if type is unknown
+        file_id = upload_to_gdrive(service, file_stream, file_name, folder_id, mimetype)
+        if file_id:
+            files_uploaded = True
+            if check_file_in_gdrive(service, file_id):
+                print(f"File {file_name} uploaded successfully and verified in Google Drive.")
+            else:
+                print(f"File {file_name} uploaded but verification in Google Drive failed.")
+        else:
+            print(f"File {file_name} failed to upload.")
+    if not files_uploaded:
+        print("No files were uploaded. Please check your S3 bucket and prefix.")
+    print("Process completed.")
+    return {
+        'statusCode': 200,
+        'body': 'Process completed successfully.'
+    }
