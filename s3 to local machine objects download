@@ -1,0 +1,6 @@
+This commands was s3 to local loaded in specific folder 
+
+
+
+aws s3 sync s3://vaishnu-files/calltrail_data/milestones_data/new_hours/ /home/vaishnu/s3files
+
