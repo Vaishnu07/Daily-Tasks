@@ -1,0 +1,1 @@
+aws s3 sync /home/vaishnu/s3files01_callrail_fixed s3://callrail-data-athiva/keyword-raw/
