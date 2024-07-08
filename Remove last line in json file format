@@ -1,0 +1,46 @@
+import os
+import json
+
+def remove_last_line(filepath, output_directory):
+    try:
+        with open(filepath, 'r') as file:
+            lines = file.readlines()
+
+        if not lines:
+            print(f"Error: Empty file {filepath}")
+            return
+
+        # Remove the last line
+        lines = lines[:-1]
+
+        # Reconstruct the content
+        content = ''.join(lines).strip()
+
+        # Ensure the output directory exists
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+
+        # Construct the output file path
+        output_filepath = os.path.join(output_directory, os.path.basename(filepath))
+
+        # Write the content back to the file
+        with open(output_filepath, 'w') as file:
+            file.write(content)
+
+        print(f"Processed file: {filepath}")
+    except Exception as e:
+        print(f"Error processing file {filepath}: {e}")
+
+def main(input_directory, output_directory):
+    for root, _, files in os.walk(input_directory):
+        for file in files:
+            if file.endswith('.json'):
+                filepath = os.path.join(root, file)
+                remove_last_line(filepath, output_directory)
+
+if __name__ == "__main__":
+    input_directory = "/home/vaishnu/s3files01_callrail"
+    output_directory = "/home/vaishnu/s3files01_callrail_fixed"
+    main(input_directory, output_directory)
+
+
