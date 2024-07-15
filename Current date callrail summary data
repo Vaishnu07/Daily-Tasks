@@ -1,0 +1,82 @@
+import boto3
+import requests
+import json
+from datetime import datetime, timedelta, timezone
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    handlers=[logging.FileHandler("app.log"),
+                              logging.StreamHandler()])
+
+# AWS S3 Configuration
+bucket_name = 'callrail-data-athiva'
+
+# Initialize S3 client with credentials
+s3_client = boto3.client(
+    's3',
+    region_name='ap-south-1',  # Replace with your AWS region
+    aws_access_key_id='0000000000',
+    aws_secret_access_key='222222222222222'
+)
+
+# CallRail API Configuration - Replace with your CallRail API key
+callrail_api_key = '513f1278bb3f98dfee7a9817f860a09d'
+
+callrail_api_url = 'https://api.callrail.com/v3/a/704644062/calls.json'
+
+
+def fetch_callrail_data():
+    headers = {
+        'Authorization': f'Token token={callrail_api_key}'
+    }
+
+    today = datetime.now(timezone.utc)
+    start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_date = start_date + timedelta(days=1)
+
+    params = {
+        'start_date': start_date.isoformat(),
+        'end_date': end_date.isoformat()
+    }
+
+    try:
+        logging.info(f"Requesting CallRail data with URL: {callrail_api_url}")
+        logging.info(f"Request headers: {headers}")
+        logging.info(f"Request parameters: {params}")
+
+        response = requests.get(callrail_api_url, headers=headers, params=params)
+        response.raise_for_status()
+        logging.info("Data fetched successfully from CallRail.")
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        logging.error(f"HTTP error occurred: {http_err} - {response.status_code}")
+    except requests.exceptions.RequestException as req_err:
+        logging.error(f"Request error occurred: {req_err}")
+    return None
+
+
+def upload_to_s3(data, filename):
+    key = f'summary-raw/{filename}'  # Ensure 'summary-raw/' prefix is added
+
+    try:
+        s3_client.put_object(Body=data.encode('utf-8'), Bucket=bucket_name, Key=key)
+        logging.info(f"File {filename} uploaded to S3 successfully.")
+    except Exception as e:
+        logging.error(f"Error uploading file to S3: {e}")
+
+
+def main():
+    data = fetch_callrail_data()
+
+    if data:
+        current_date = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        filename = f"callrail_summary_data_{current_date}.json"
+        data_str = json.dumps(data)
+        upload_to_s3(data_str, filename)
+
+
+if __name__ == "__main__":
+    main()
+
