@@ -1,0 +1,22 @@
+CREATE EXTERNAL TABLE `campaign_report_v3`(
+  `campaign name` string, 
+  `date` string, 
+  `sent` bigint, 
+  `received` bigint, 
+  `unsubscribes` bigint, 
+  `message` string, 
+  `url` string, 
+  `clicked` bigint, 
+  `success rate` bigint, 
+  `ctr` bigint, 
+  `used credits` string, 
+  `campaign_number` string)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+	'separatorChar' = ',',
+	'quoteChar' = '"',
+	'escapeChar' = '\\'
+)
+STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION 's3://simple-texting/campaign_report/'
+TBLPROPERTIES ('skip.header.line.count' = '1')
