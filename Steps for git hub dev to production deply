@@ -1,0 +1,68 @@
+step 1
+
+local empty folder create, then copy url of git clone ----- local download.
+
+step 2 
+
+NOw MAIN branch to Dev branch ---- git checkout dev
+
+
+step 3
+
+Now here dev branch. Then creating a feauture-for-add-alaram ----- git checkout -b feauture-for-add-alaram
+
+step 4
+
+Now here feauture-for-add-alaram. Make change what we need for project (alarm set for template)
+
+step 5 
+
+git add.
+
+step 6 
+
+git commit -m "message"
+
+step 7 
+
+git push 
+
+
+step 8
+
+login to git console, then pull request feature to dev 
+
+dev<-- feature 
+
+
+
+
+
+
+
+
+
+
+
+
+PreSignedUrlFunctionErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Error alarm for PreSignedUrlFunction Function
+      AlarmActions:
+      - Ref: snstopicarn
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+      - Name: FunctionName
+        Value:
+          Ref: PreSignedUrlFunction
+      Statistic: Sum
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: 0
+      EvaluationPeriods: 1
+      Period: 60
+      TreatMissingData: notBreaching
+    Metadata:
+      SamResourceId: PreSignedUrlFunctionErrorAlarm
+
