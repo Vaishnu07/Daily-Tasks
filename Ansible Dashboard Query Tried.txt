@@ -1,0 +1,151 @@
+-----------------------------------
+Ansible Success rate Query :
+-----------------------------------
+
+SELECT attributes.campaign_id, campaign_name,
+CASE
+    WHEN campaign_name LIKE 'NEW%' THEN 'NEW'
+    WHEN campaign_name LIKE 'OLD%' THEN 'OLD'
+    WHEN campaign_name LIKE 'WWO%' THEN 'WWO'
+    WHEN campaign_name LIKE 'REPO%' THEN 'REPO'
+    WHEN campaign_name LIKE 'VS%' THEN 'VS'
+    WHEN campaign_name LIKE 'RNWL%' THEN 'RNWL'
+    ELSE 'Not Available'
+    END AS campaign_type,
+CAST(date_format(CAST(campaign_start_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) campaign_start_time,
+CAST(date_format(CAST(end_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) campaign_end_time,
+COUNT(CASE WHEN event_type = '_SMS.SUCCESS' THEN 1 ELSE NULL END) delivered_messages,
+COUNT(CASE WHEN event_type = '_SMS.FAILURE' THEN 1 ELSE NULL END) failed_messages,
+COUNT(CASE WHEN event_type = '_SMS.OPTOUT' THEN 1 ELSE NULL END) optout_count,
+COUNT(CASE WHEN event_type = '_campaign.send' THEN 1 ELSE NULL END) total_messages,
+ROUND(COUNT(CASE WHEN event_type = '_SMS.SUCCESS' THEN 1 ELSE NULL END)*100.0/COUNT(CASE WHEN event_type = '_campaign.send' THEN 1 ELSE NULL END), 2) success_rate,
+ROUND(COUNT(CASE WHEN event_type = '_SMS.OPTOUT' THEN 1 ELSE NULL END)*100.0/COUNT(CASE WHEN event_type = '_SMS.SUCCESS' THEN 1 ELSE NULL END), 2) optout_percentage
+FROM "AwsDataCatalog"."liberty-leadgen-database"."bulk_sms_delivery_status" delivery_status
+JOIN "dynamodb"."default"."sms-campaigns-table" campaigns_info
+ON attributes.campaign_id = campaigns_info.campaign_id
+GROUP BY 1, 2, 3, 4, 5
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Ansible Failure  drildown
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT attributes.campaign_id, campaign_name,
+CASE
+    WHEN campaign_name LIKE 'NEW%' THEN 'NEW'
+    WHEN campaign_name LIKE 'OLD%' THEN 'OLD'
+    WHEN campaign_name LIKE 'WWO%' THEN 'WWO'
+    WHEN campaign_name LIKE 'REPO%' THEN 'REPO'
+    WHEN campaign_name LIKE 'VS%' THEN 'VS'
+    WHEN campaign_name LIKE 'RNWL%' THEN 'RNWL'
+    ELSE 'Not Available'
+    END AS campaign_type,
+CAST(date_format(CAST(campaign_start_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) campaign_start_time,
+CAST(date_format(CAST(end_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) campaign_end_time,
+event_type, attributes.record_status,
+COUNT(DISTINCT attributes.destination_phone_number) count_of_events
+FROM "AwsDataCatalog"."liberty-leadgen-database"."bulk_sms_delivery_status" delivery_status
+JOIN "dynamodb"."default"."sms-campaigns-table" campaigns_info
+ON attributes.campaign_id = campaigns_info.campaign_id
+GROUP BY 1, 2, 3, 4, 5, 6, 7
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Ansible_daily_cost_by_campaign_type
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT date(CAST(date_format(CAST(campaign_start_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp)) campaign_start_date,
+CASE
+    WHEN campaign_name LIKE 'NEW%' THEN 'NEW'
+    WHEN campaign_name LIKE 'OLD%' THEN 'OLD'
+    WHEN campaign_name LIKE 'WWO%' THEN 'WWO'
+    WHEN campaign_name LIKE 'REPO%' THEN 'REPO'
+    WHEN campaign_name LIKE 'VS%' THEN 'VS'
+    WHEN campaign_name LIKE 'RNWL%' THEN 'RNWL'
+    ELSE 'Not Available'
+    END AS campaign_type,
+ROUND(SUM(metrics.price_in_millicents_usd)/100000, 2) campaign_cost_in_usd
+FROM "AwsDataCatalog"."liberty-leadgen-database"."bulk_sms_delivery_status" delivery_status
+JOIN "dynamodb"."default"."sms-campaigns-table" campaigns_info
+ON attributes.campaign_id = campaigns_info.campaign_id
+AND event_type IN ('_SMS.SUCCESS', '_SMS.FAILURE')
+WHERE date(date(dt)) BETWEEN date_add('day', -30, current_date) AND date(current_date)
+GROUP BY 1, 2
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Ansible_Optout
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT optout_data.campaign_name,
+CAST(total_numbers AS INT) total_contacts,
+CASE
+    WHEN optout_data.campaign_name LIKE 'NEW%' THEN 'NEW'
+    WHEN optout_data.campaign_name LIKE 'OLD%' THEN 'OLD'
+    WHEN optout_data.campaign_name LIKE 'WWO%' THEN 'WWO'
+    WHEN optout_data.campaign_name LIKE 'REPO%' THEN 'REPO'
+    WHEN optout_data.campaign_name LIKE 'VS%' THEN 'VS'
+    WHEN optout_data.campaign_name LIKE 'RNWL%' THEN 'RNWL'
+    ELSE "by"
+    END AS campaign_type,
+opt_out_list_name,
+CASE
+    WHEN length(customer_number) = 10 THEN CONCAT('+1', customer_number)
+    ELSE customer_number END AS customer_number,
+"by" optout_by,
+CAST(date_format(CAST(parse_datetime(time, 'yyyy-MM-dd HH:mm:ss') AS TIMESTAMP) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS TIMESTAMP) optout_time,
+optout_data.campaign_id
+FROM "dynamodb"."default"."opt_out" optout_data
+JOIN "dynamodb"."default"."sms-campaigns-table" campaign_details
+ON optout_data.campaign_id = campaign_details.campaign_id
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Ansible_clicks_data
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SELECT attributes.campaign_id, campaigns_info.campaign_name,
+CASE
+    WHEN campaigns_info.campaign_name LIKE 'NEW%' THEN 'NEW'
+    WHEN campaigns_info.campaign_name LIKE 'OLD%' THEN 'OLD'
+    WHEN campaigns_info.campaign_name LIKE 'WWO%' THEN 'WWO'
+    WHEN campaigns_info.campaign_name LIKE 'REPO%' THEN 'REPO'
+    WHEN campaigns_info.campaign_name LIKE 'VS%' THEN 'VS'
+    WHEN campaigns_info.campaign_name LIKE 'RNWL%' THEN 'RNWL'
+    ELSE 'Not Available'
+    END AS campaign_type,
+CAST(date_format(CAST(campaign_start_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) campaign_start_time,
+CAST(date_format(CAST(end_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) campaign_end_time,
+event_type, attributes.record_status,
+attributes.destination_phone_number,
+is_opened,
+CAST(date_format(CAST(url_opened_time AS timestamp) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) url_opened_time,
+CAST(date_format(from_unixtime(arrival_timestamp/1000) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) arrival_timestamp,
+CAST(date_format(from_unixtime(event_timestamp/1000) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS timestamp) event_timestamp,
+metrics.price_in_millicents_usd
+FROM "AwsDataCatalog"."liberty-leadgen-database"."bulk_sms_delivery_status" delivery_status
+JOIN "dynamodb"."default"."sms-campaigns-table" campaigns_info
+ON attributes.campaign_id = campaigns_info.campaign_id
+AND event_type IN ('_SMS.SUCCESS', '_SMS.FAILURE')
+JOIN "dynamodb"."default"."url-shortner-records" clicks_info
+ON attributes.campaign_id = clicks_info.campaign_id
+AND attributes.destination_phone_number = clicks_info.customer_number
+WHERE date(date(dt)) BETWEEN date_add('day', -30, current_date) AND date(current_date)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Agent_non_response_report
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM (SELECT currentagentsnapshot.configuration.username agent_username
+, currentagentsnapshot.configuration.routingprofile.name routing_profile_name
+, currentagentsnapshot.configuration.routingprofile.inboundqueues[1].name queue_name
+, currentagentsnapshot.contacts[1].initiationmethod initiation_method
+, currentagentsnapshot.contacts[1].contactid contact_id
+, currentagentsnapshot.contacts[1].state contact_state
+, CAST(parse_datetime(eventtimestamp, 'yyyy-MM-dd''T''HH:mm:ss.SSS''Z') AS TIMESTAMP) eventtimestamp_utc
+, CAST(date_format(CAST(parse_datetime(eventtimestamp, 'yyyy-MM-dd''T''HH:mm:ss.SSS''Z') AS TIMESTAMP) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS TIMESTAMP) eventtimestamp_est
+, ROW_NUMBER() OVER (PARTITION BY currentagentsnapshot.configuration.username, currentagentsnapshot.contacts[1].contactid 
+    ORDER BY CAST(date_format(CAST(parse_datetime(eventtimestamp, 'yyyy-MM-dd''T''HH:mm:ss.SSS''Z') AS TIMESTAMP) AT TIME ZONE 'America/New_York', '%Y-%m-%d %H:%i:%s') AS TIMESTAMP) DESC) row_number_for_last_state
+, year
+, month
+, day
+FROM "liberty-leadgen-database"."lhg_agent_status_events"
+WHERE date(CONCAT(year, '-', month, '-', day)) BETWEEN date_add('month', -1, CURRENT_DATE) AND CURRENT_DATE
+AND cardinality(currentagentsnapshot.contacts) > 0
+AND currentagentsnapshot.contacts[1].initiationmethod IN ('INBOUND', 'TRANSFER', 'API','CALLBACK'))
+WHERE row_number_for_last_state = 1
+AND contact_state IN ('MISSED','ERROR', 'REJECTED')
