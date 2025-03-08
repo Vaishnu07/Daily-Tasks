@@ -1,0 +1,68 @@
+Stpe 1 
+
+Empty Folder open on Visual Studio & create a role.sh file 
+
+Step 2 
+
+AWS Toolkit download, and Need be gitbash for windows 
+
+Step 3 
+
+
+
+Step 4
+
+Connect with aws 
+Request approved
+
+AWS IDE Extensions for VS Code have been given requested permissions
+
+
+step 5 
+
+Source role.sh
+
+step 6 
+
+aws s3 ls 
+
+step 7
+
+Access pinpoint data retrive data run the command
+
+
+
+ role.sh file :
+
+
+#!/bin/bash
+# Script to assume an AWS role using STS and set temporary credentials
+# Parameters
+ROLE_ARN="arn:aws:iam::766717188698:role/athivatech-cts-monitoring-role"
+SESSION_NAME="cts-monitoring"
+# Assume the role
+echo "Assuming role $ROLE_ARN..."
+ASSUME_ROLE_OUTPUT=$(aws sts assume-role --role-arn "$ROLE_ARN" --role-session-name "$SESSION_NAME")
+# Check if the command succeeded
+if [ $? -ne 0 ]; then
+    echo "Failed to assume role."
+    exit 1
+fi
+# Extract temporary credentials using awk and sed
+AWS_ACCESS_KEY_ID=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"AccessKeyId": "[^"]*' | sed 's/"AccessKeyId": "//')
+AWS_SECRET_ACCESS_KEY=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"SecretAccessKey": "[^"]*' | sed 's/"SecretAccessKey": "//')
+AWS_SESSION_TOKEN=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"SessionToken": "[^"]*' | sed 's/"SessionToken": "//')
+# Export the credentials
+export AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY
+export AWS_SESSION_TOKEN
+# Verify the credentials by displaying the caller identity
+echo "Verifying assumed role credentials..."
+aws sts get-caller-identity
+echo "Temporary credentials have been set for the session."
+
+
+
+
+
+
